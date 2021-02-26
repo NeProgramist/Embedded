@@ -25,10 +25,12 @@ class PlotsDrawer {
                 }
 
                 xaxis {
+                    margin { l = 50 }
                     title = xaxis
                 }
 
                 yaxis {
+                    margin { b = 50 }
                     title = yaxis
                 }
             }

@@ -32,6 +32,20 @@ fun main() {
 
     //Time Complexity
     measureSignalComplexity((1..1028), frequency, discreteCountDown, "./res/complexity.csv")
+
+    //Additional task
+    val resAd = mutableMapOf<Double, Double>()
+    for (N in 2..1024 step 2) {
+        val signalAd = SignalGenerator(harmonic, frequency, N).generate()
+
+        val mAd = calculator.generateExpectedValue(signalAd)
+        val dAd = calculator.generateDispersion(signalAd)
+        val key = N.toDouble()
+
+        resAd[key] = mAd * dAd
+    }
+
+    plotsDrawer.createPlot(resAd, "Mx * Dx", "N")
 }
 
 /*

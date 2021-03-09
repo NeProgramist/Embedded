@@ -1,0 +1,26 @@
+# Project exclude paths
+.gradle/
+build/
+LAB_RTS_2021/
+
+*.class
+*.log
+*.ctxt
+
+.mtj.tmp/
+
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+hs_err_pid*
+
+.idea/embedded.iml
+.idea/misc.xml
+.idea/vcs.xml
+
+gradle/

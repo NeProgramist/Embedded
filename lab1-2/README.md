@@ -5,7 +5,7 @@ Lab 1.2
 
 Additional task
   * [Code](https://github.com/NeProgramist/Embedded/tree/master/lab1-2/src/main/kotlin/main.kt)
-  * [Image](https://github.com/NeProgramist/Embedded/tree/master/lab1-2/res/map_array_comparing.png)
+  * [Image](https://github.com/NeProgramist/Embedded/tree/master/lab1-2/resources/map_array_comparing.png)
 
   ![](https://github.com/NeProgramist/Embedded/tree/master/lab1-2/res/map_array_comparing.png)
   Було виконана генерація сигналів за допомогою масиву та асоціативного масиву(словник). Було виконано обчислення

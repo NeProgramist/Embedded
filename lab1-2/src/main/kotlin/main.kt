@@ -10,28 +10,28 @@ fun main() {
     val discreteCountDown = 1024
 
     val signalGenerator = SignalGenerator(harmonic, frequency, discreteCountDown)
-//    val plotsDrawer = PlotsDrawer()
-//    val calculations = Calculations()
-//
-//    val autoCorrelation = mutableMapOf<Double, Double>()
-//    val signal = signalGenerator.generate()
-//    for (bias in 0 until 1024) {
-//        val biased = signal.filter { p -> p.key >= bias }.mapKeys { p -> p.key - bias }
-//        autoCorrelation[bias.toDouble()] = calculations.calculateCorrelation(signal, biased)
-//    }
-//
-//    val correlation = mutableMapOf<Double, Double>()
-//    val signal2 = signalGenerator.generate()
-//    for (bias in 0 until 1024) {
-//        val biased = signal2.filter { p -> p.key >= bias }.mapKeys { p -> p.key - bias }
-//        correlation[bias.toDouble()] = calculations.calculateCorrelation(signal, biased)
-//    }
+    val plotsDrawer = PlotsDrawer()
+    val calculations = Calculations()
+
+    val autoCorrelation = mutableMapOf<Double, Double>()
+    val signal = signalGenerator.generate()
+    for (bias in 0 until 1024) {
+        val biased = signal.filter { p -> p.key >= bias }.mapKeys { p -> p.key - bias }
+        autoCorrelation[bias.toDouble()] = calculations.calculateCorrelation(signal, biased)
+    }
+
+    val correlation = mutableMapOf<Double, Double>()
+    val signal2 = signalGenerator.generate()
+    for (bias in 0 until 1024) {
+        val biased = signal2.filter { p -> p.key >= bias }.mapKeys { p -> p.key - bias }
+        correlation[bias.toDouble()] = calculations.calculateCorrelation(signal, biased)
+    }
 
 
     testDifferentDataStructures(signalGenerator)
-//
-//    plotsDrawer.createPlot(autoCorrelation, "T(bias)", "AutoCorrelation")
-//    plotsDrawer.createPlot(correlation, "T(bias)", "Correlation")
+
+    plotsDrawer.createPlot(autoCorrelation, "T(bias)", "AutoCorrelation")
+    plotsDrawer.createPlot(correlation, "T(bias)", "Correlation")
 }
 
 fun testDifferentDataStructures(signalGenerator: SignalGenerator) {

@@ -28,11 +28,13 @@ class MainActivity : AppCompatActivity() {
             if (!it.isNullOrBlank()) {
                 try {
                     binding.textView.text = "Calculating..."
+                    binding.iterations.text = "Iterations: calculating..."
                     val num = it.toString().toLong()
                     GlobalScope.launch {
-                        val (a, b) = factorization(num)
+                        val (a, b, c) = factorization(num)
                         withContext(Dispatchers.Main) {
                             binding.textView.text = "$num = $a * $b"
+                            binding.iterations.text = "Iterations: $c"
                         }
                     }
                 } catch(e: Exception) {
@@ -42,16 +44,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun factorization(n: Long): Pair<Double, Double>{
+    private fun factorization(n: Long): Triple<Double, Double, Long>{
         val k = ceil(sqrt(n.toDouble()))
 
         for (a in k.toInt()..n) {
             val b = a.toDouble().pow(2) - n
             val q = sqrt(b)
-            if (q.isWhole()) return a + q to a - q
+            if (q.isWhole()) return Triple(a + q, a - q, a - k.toLong() + 1)
         }
 
-        return 1.toDouble() to n.toDouble()
+        return Triple(1.toDouble(), n.toDouble(), n - k.toLong() + 1)
     }
 
     private fun Double.isWhole() = this.toLong() - this == 0.0

@@ -22,7 +22,7 @@ class NeuroAlgorithm(
     private var job: Job? = null
     private var cancelJob: Job? = null
 
-    suspend fun start(onDone: suspend (NeuroResult) -> Unit) {
+    fun start(onDone: suspend (NeuroResult) -> Unit) {
         job = GlobalScope.launch {
             var w0 = 0f
             var w1 = 0f
@@ -87,5 +87,33 @@ class NeuroAlgorithm(
 
             onDone(nr)
         }
+    }
+}
+
+suspend fun main() {
+    val res = sortedMapOf<Float, Float>()
+
+    for (i in 1..300) {
+        val ls = i / 1000f
+        val na = NeuroAlgorithm(
+            iterations = 400f,
+            learningSpeed = i / ls,
+            deadline = 4f,
+            p = 4,
+            points = listOf(0 to 6, 1 to 5, 3 to 3, 2 to 4)
+        )
+
+        val start = System.currentTimeMillis()
+
+        na.start {
+            val time = System.currentTimeMillis() - start
+            res[ls] = time / 1000f
+        }
+    }
+
+    delay(4000)
+
+    for (i in res) {
+        println("${i.value}")
     }
 }

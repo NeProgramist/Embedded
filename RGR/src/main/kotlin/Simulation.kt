@@ -26,12 +26,13 @@ fun simulate(settings: SimulationSettings) {
     val edf = EDF()
 
     intensityRange.forEach { i ->
-        val intensity = i.toDouble()
+        val intensity = i / 10.0
         var tasks = generateTasks(intensity, tacts, wcetRange)
 
         val schedulerFifo = Scheduler(
             fifo,
             quantum,
+            tacts,
             tasks.toMutableList(),
             switchTime,
         )
@@ -39,11 +40,15 @@ fun simulate(settings: SimulationSettings) {
 
         fifoAverageWaitingTime[intensity] = resFifo.averageWaitingTime()
         fifoAverageIdleTime[intensity] = resFifo.averageIdleTime(schedulerFifo.time)
+        if (resFifo.averageIdleTime(schedulerFifo.time) < 0) {
+            println()
+        }
 
         tasks = generateTasks(intensity, tacts, wcetRange)
         val schedulerRm = Scheduler(
             rm,
             quantum,
+            tacts,
             tasks.toMutableList(),
             switchTime,
         )
@@ -52,10 +57,15 @@ fun simulate(settings: SimulationSettings) {
         rmAverageWaitingTime[intensity] = resRm.averageWaitingTime()
         rmAverageIdleTime[intensity] = resRm.averageIdleTime(schedulerRm.time)
 
+        if (resRm.averageIdleTime(schedulerFifo.time) < 0) {
+            println()
+        }
+
         tasks = generateTasks(intensity, tacts, wcetRange)
         val schedulerEdf = Scheduler(
             edf,
             quantum,
+            tacts,
             tasks.toMutableList(),
             switchTime,
         )
@@ -83,10 +93,10 @@ fun simulate(settings: SimulationSettings) {
 
 fun main() {
     simulate(SimulationSettings(
-        5000,
+        1000,
         3,
         1,
         (1..10),
-        (1..30)
+        (1..300)
     ))
 }

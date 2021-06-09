@@ -27,7 +27,7 @@ class FIFO: SchedulerAlgorithm {
 
 class RM: SchedulerAlgorithm {
     override val name = "RM"
-    override fun chooseTask(tasks: List<TaskDescriptor>) = tasks.minByOrNull { it.task.frequency }
+    override fun chooseTask(tasks: List<TaskDescriptor>) = tasks.maxByOrNull { it.task.frequency }
 }
 
 class EDF: SchedulerAlgorithm {
@@ -38,6 +38,7 @@ class EDF: SchedulerAlgorithm {
 class Scheduler(
     private val schedulerAlgorithm: SchedulerAlgorithm,
     private val quantum: Int,
+    private val tacts: Int,
     private val tasks: MutableList<TaskDescriptor>,
     private val switchTime: Int = 0,
 ) {
@@ -46,10 +47,10 @@ class Scheduler(
 
     fun start(): List<TaskDescriptor> {
         var currentTask: TaskDescriptor? = null
-        while(tasks.isNotEmpty()) {
-            tasks.dropMissed()
 
+        while(tasks.isNotEmpty() && time < tacts) {
             if (time % quantum == 0) {
+                tasks.dropMissed()
                 val available = tasks.takeActual()
                 val task = schedulerAlgorithm.chooseTask(available)
                 if (currentTask != task && task != null) time += switchTime
@@ -60,6 +61,7 @@ class Scheduler(
             time++
         }
 
+        result.addAll(tasks)
         return result
     }
 
@@ -68,9 +70,6 @@ class Scheduler(
     private fun TaskDescriptor.drop() {
         tasks.remove(this)
         val waitingTime = time - start - progress
-        if (waitingTime < 0) {
-progress
-        }
         result.add(this.also { it.waitingTime = waitingTime })
     }
 
@@ -85,6 +84,3 @@ progress
         it
     }
 }
-
-
-

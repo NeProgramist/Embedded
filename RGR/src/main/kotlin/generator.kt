@@ -7,10 +7,10 @@ fun generateTasks(intensity: Double, tacts: Int, wcetRange: IntRange): List<Task
     val tasks = mutableListOf<TaskDescriptor>()
 
     repeat(tasksSpread.size) {
-        val fr = intensity * tasksSpread[it]
-        var start = generatePoisson(1 / fr)
+        val fr = 1 / (intensity * tasksSpread[it])
+        var start = 0
         val wcet = wcetRange.random()
-        val deadline = wcet * ((0.1 + Random.nextDouble()) * 10).toInt()
+        val deadline = wcet * ((0.5 + Random.nextDouble()) * 10).toInt()
 
         while (start + wcet <= tacts) {
             val task = TaskDescriptor(
@@ -18,7 +18,7 @@ fun generateTasks(intensity: Double, tacts: Int, wcetRange: IntRange): List<Task
                 start = start,
             )
             tasks.add(task)
-            start += generatePoisson(1 / fr)
+            start += generatePoisson(fr)
         }
     }
 
@@ -31,9 +31,9 @@ fun generatePoisson(lambda: Double): Int {
     var k = 0
 
     do {
-        k++;
+        k++
         p *= Random.nextDouble()
-    } while (p > l);
+    } while (p > l)
 
     return k - 1
 }

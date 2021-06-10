@@ -17,26 +17,30 @@ data class TaskDescriptor(
 
 interface SchedulerAlgorithm {
     val name: String
+    var currentTask: TaskDescriptor?
     fun chooseTask(tasks: List<TaskDescriptor>): TaskDescriptor?
 }
 
 class FIFO: SchedulerAlgorithm {
     override val name = "FIFO"
-    override fun chooseTask(tasks: List<TaskDescriptor>) = tasks.firstOrNull()
+    override var currentTask: TaskDescriptor? = null
+    override fun chooseTask(tasks: List<TaskDescriptor>) = currentTask ?: tasks.firstOrNull()
 }
 
 class RM: SchedulerAlgorithm {
     override val name = "RM"
-    override fun chooseTask(tasks: List<TaskDescriptor>) = tasks.maxByOrNull { it.task.frequency }
+    override var currentTask: TaskDescriptor? = null
+    override fun chooseTask(tasks: List<TaskDescriptor>) = tasks.minByOrNull { it.task.frequency }
 }
 
 class EDF: SchedulerAlgorithm {
     override val name = "EDF"
+    override var currentTask: TaskDescriptor? = null
     override fun chooseTask(tasks: List<TaskDescriptor>) = tasks.minByOrNull { it.task.deadline }
 }
 
 class Scheduler(
-    private val schedulerAlgorithm: SchedulerAlgorithm,
+    private val sa: SchedulerAlgorithm,
     private val quantum: Int,
     private val tacts: Int,
     private val tasks: MutableList<TaskDescriptor>,
@@ -46,41 +50,101 @@ class Scheduler(
     private val result = mutableListOf<TaskDescriptor>()
 
     fun start(): List<TaskDescriptor> {
-        var currentTask: TaskDescriptor? = null
-
         while(tasks.isNotEmpty() && time < tacts) {
+            tasks.dropMissed(sa.currentTask)
+
             if (time % quantum == 0) {
-                tasks.dropMissed()
                 val available = tasks.takeActual()
-                val task = schedulerAlgorithm.chooseTask(available)
-                if (currentTask != task && task != null) time += switchTime
-                currentTask = task
+                val task = sa.chooseTask(available)
+                if (task != null && sa.currentTask != task) {
+                    time += switchTime
+                    sa.currentTask = task
+                }
             }
 
-            currentTask = currentTask.operate()
+            sa.currentTask = sa.currentTask?.operate()
             time++
         }
 
-        result.addAll(tasks)
+        tasks.toMutableList().forEach { it.drop() }
         return result
     }
 
     private fun List<TaskDescriptor>.takeActual() = filter { it.start <= time }
-    private fun List<TaskDescriptor>.dropMissed() = filter { !it.canBeDone(time) }.forEach { it.drop() }
+    private fun List<TaskDescriptor>.dropMissed(td: TaskDescriptor?) = filter { !it.canBeDone(time) }.forEach {
+        if (td !== it) it.drop()
+    }
     private fun TaskDescriptor.drop() {
         tasks.remove(this)
         val waitingTime = time - start - progress
         result.add(this.also { it.waitingTime = waitingTime })
     }
 
-    private fun TaskDescriptor?.operate() = this?.let {
-        it.progress++
+    private fun TaskDescriptor.done() {
+        tasks.remove(this)
+        val waitingTime = time - start - progress
+        if (waitingTime < 0) {
+            println()
+        }
+        result.add(this.also { it.waitingTime = waitingTime })
+    }
 
-        if (isMissed(time) || isDone()) {
-            it.drop()
-            return@let null
+    private fun TaskDescriptor.operate(): TaskDescriptor? {
+        progress++
+
+        if (isMissed(time)) {
+            drop()
+            return null
         }
 
-        it
+        if (isDone()) {
+            drop()
+            return null
+        }
+
+        return this
     }
+}
+
+fun main() {
+    val tasks = listOf(
+        TaskDescriptor(
+            Task(0.1, 2, 4),
+            start = 0,
+        ),
+        TaskDescriptor(
+            Task(0.1, 2, 3),
+            start = 2,
+        ),
+        TaskDescriptor(
+            Task(0.2, 5, 6),
+            start = 4,
+        ),
+        TaskDescriptor(
+            Task(0.3, 2, 2),
+            start = 6,
+        ),
+        TaskDescriptor(
+            Task(0.1, 3, 4),
+            start = 7,
+        ),
+        TaskDescriptor(
+            Task(0.1, 2, 5),
+            start = 10,
+        ),
+        TaskDescriptor(
+            Task(0.3, 1, 4),
+            start = 10,
+        ),
+    )
+
+    val scheduler = Scheduler(
+        EDF(),
+        3,
+        100,
+        tasks.toMutableList(),
+        1,
+    )
+    val resEdf = scheduler.start()
+    println()
 }
